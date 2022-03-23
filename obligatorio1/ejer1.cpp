@@ -12,12 +12,17 @@ int main (void)
     ofstream fichero;
     ifstream datos;
     double t;
+    int n;
     float a[9][2], v[9][2], r[9][2];
     float m[9];
 
+    lecturadatos (m,r,v);
+    cout << m[4];
+    cout << r[2][1];
+    cin >> n;
 
 
-    
+
     return 0;
 }
 
@@ -45,7 +50,8 @@ void aceleracion (float m[9], float r[9][2], float a[9][2])
  return;
     }
 
-
+//función para leer los valores iniciales
+// añadir la velocidad
 void lecturadatos (float m[9],float r[9][2],float v[9][2])
 {
     ifstream datos;
@@ -60,11 +66,11 @@ void lecturadatos (float m[9],float r[9][2],float v[9][2])
     while (!datos.eof() && l<9)
     {
         datos >> r[l][0];
-        datos >> r[l][0];
+        datos >> r[l][1];
         l++;
     }
 
-
+//añadir la lectura de la velocidad
     datos.close();
     return;
 }
