@@ -52,7 +52,7 @@ void aceleracion (float m[9], float r[9][2], float a[9][2])
     }
 
 //función para leer los valores iniciales
-// añadir la velocidad
+
 void lecturadatos (float m[9],float r[9][2],float v[9][2])
 {
     ifstream datos;
@@ -79,7 +79,7 @@ void lecturadatos (float m[9],float r[9][2],float v[9][2])
         l++;
     }
 
-//añadir la lectura de la velocidad
+
     datos.close();
     return;
 }
