@@ -19,6 +19,7 @@ int main (void)
     lecturadatos (m,r,v);
     cout << m[4];
     cout << r[2][1];
+    cout << v[3][1];
     cin >> n;
 
 
@@ -55,8 +56,10 @@ void aceleracion (float m[9], float r[9][2], float a[9][2])
 void lecturadatos (float m[9],float r[9][2],float v[9][2])
 {
     ifstream datos;
-    int k,l;
+    int k,l,n;
     k=0;
+    l=0;
+    n=0;
     datos.open("valoresiniciales.txt");
     while (!datos.eof() && k<9)
     {
@@ -67,6 +70,12 @@ void lecturadatos (float m[9],float r[9][2],float v[9][2])
     {
         datos >> r[l][0];
         datos >> r[l][1];
+        l++;
+    }
+    while (!datos.eof() && n<9)
+    {
+        datos >> v[n][0];
+        datos >> v[n][1];
         l++;
     }
 
