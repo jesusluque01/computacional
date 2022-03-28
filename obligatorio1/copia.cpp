@@ -6,15 +6,15 @@ using namespace std;
 //para incluir string debe estar antes using namespace
 #include <string>
 
- void reescalar (double& Tmax, double& h,float m[9], float r[9][2]);
+ void reescalar (double& Tmax, double& h,float m[9], float r[9][2], float v[9][2]);
 void aceleracion (float m[9],float r[9][2],float a[9][2]);
 void lecturadatos (float m[9],float r[9][2],float v[9][2]);
 
 void copiar (float a[9][2], string nombre);
 
-#define G 4.0
-#define MS 4.0
-#define C 4.0
+#define G 6.67e-11
+#define MS 1.989e30
+#define C 1.49e14
 
 
 
@@ -38,15 +38,16 @@ int main (void)
 
 
     //establezco el tiempo límite y el paso
-    Tmax=8.0;
-    h=1.0;
+    Tmax=10000;
+    h=0.01;
     t=0.0;
 
     //leemos los valores iniciales, los reescalamos 
     //y obtenemos la acel inicial
     lecturadatos (m,r,v);
-    reescalar (Tmax,h,m,r);
+    reescalar (Tmax,h,m,r,v);
     aceleracion (m,r,a);
+    cout<< r[3][1]<< v[1][1];
 
     //Algoritmo de verlet
     
@@ -64,7 +65,7 @@ int main (void)
     }
        //actualizamos la aceleracion
     aceleracion (m,r,a);
-    cout<< a[0][0]<<a[0][1];
+   
     //actualizamos la velocidad
     for (j=0;j<9;j++)
     {
@@ -75,11 +76,11 @@ int main (void)
     //pasamos los resultados a un fichero
     for (l=0;l<9;l++)
      {
-         fichero1 << a[l][0]<<", "<<a[l][1]<<endl;
+         fichero1 << r[l][0]<<", "<<r[l][1]<<endl;
          fichero2 << v[l][0]<<", "<<v[l][1]<<endl;
      }
     
-   
+        fichero1<<endl;
 
 
     t=t+h;
@@ -89,7 +90,7 @@ int main (void)
     
     fichero1.close();
     fichero2.close();
-    cin >> n;
+    cin>>n;
 
 
 
@@ -168,7 +169,7 @@ void lecturadatos (float m[9],float r[9][2],float v[9][2])
 
 /* los cálculos que realizados se basan en expresiones
 cuyas magnitudes están reescaladas*/
- void reescalar (double& Tmax, double& h, float m[9], float r[9][2])
+ void reescalar (double& Tmax, double& h, float m[9], float r[9][2], float v [9][2])
  {
      int i, j, k;
 
@@ -180,6 +181,7 @@ cuyas magnitudes están reescaladas*/
          for (i=0; i<=1; i++)
          {
              r[j][i]=r[j][i]/C;
+             v[j][i]=v[j][i]*sqrt(C/(G*MS));
          }
      }
 
