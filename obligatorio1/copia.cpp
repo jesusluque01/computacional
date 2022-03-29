@@ -6,7 +6,7 @@ using namespace std;
 //para incluir string debe estar antes using namespace
 #include <string>
 
- void reescalar (double& Tmax, double& h,float m[9], float r[9][2], float v[9][2]);
+ void reescalar (float m[9], float r[9][2], float v[9][2]);
 void aceleracion (float m[9],float r[9][2],float a[9][2]);
 void lecturadatos (float m[9],float r[9][2],float v[9][2]);
 
@@ -14,44 +14,55 @@ void copiar (float a[9][2], string nombre);
 
 #define G 6.67e-11
 #define MS 1.989e30
-#define C 1.49e14
+#define C 1.49e11
 
 
 
 
 int main (void)
 {
-    ofstream fichero1, fichero2;
+    ofstream fichero1, fichero2, fichero3;
     ifstream datos;
     double t, Tmax, h;
-    int n,i,j,l;
+    int n,i,j,k,l,d;
     float a[9][2], v[9][2], r[9][2], anuevo[9][2], w[9][2];
-    float m[9];
-    string nombrefich1, nombrefich2;
+    float m[9], T[9];
+    string nombrefich1, nombrefich2, nombrefich3;
+    bool periodo, encontrado[9], semiT[9];
 
 
     //establezco los nombres de los ficheros en los que mostraremos los resultados
     nombrefich1="datos.txt";
     nombrefich2="energia.txt";
+    nombrefich3="periodos.txt";
     fichero1.open(nombrefich1.c_str());
     fichero2.open(nombrefich2.c_str());
+    fichero3.open(nombrefich3.c_str());
 
 
     //establezco el tiempo límite y el paso
-    Tmax=10000;
+    Tmax=1000;
     h=0.01;
     t=0.0;
 
     //leemos los valores iniciales, los reescalamos 
     //y obtenemos la acel inicial
     lecturadatos (m,r,v);
-    reescalar (Tmax,h,m,r,v);
+    reescalar (m,r,v);
     aceleracion (m,r,a);
     cout<< r[3][1]<< v[1][1];
 
+    
+    //Inicializo las variables necesarias para calcular los periodos
+    periodo=false;
+    for (n=0;n<9;n++)
+    {
+        T[n]=0.0;
+        semiT[n]=false;
+        encontrado[n]=false;
+    }
+    
     //Algoritmo de verlet
-    
-    
     do
     {
         for (i=0;i<9;i++)
@@ -70,7 +81,7 @@ int main (void)
     for (j=0;j<9;j++)
     {
          v[j][0]=w[j][0]+h*0.5*a[j][0];
-         v[j][1]=w[j][1]+h*0.5*a[j][0];
+         v[j][1]=w[j][1]+h*0.5*a[j][1];
     }
 
     //pasamos los resultados a un fichero
@@ -82,14 +93,56 @@ int main (void)
     
         fichero1<<endl;
 
+    //Calculamos el periodo
+    //comprobamos que no se tenga ya el valor de los periodos
+    if (periodo==false)
+    {
+        /*Buscamos obtener todos los periodos por lo que utilizamos un for
+        para trabajar con todos uno a uno. Buscamos comprobar que el planeta en cuestión
+        no haya vuelto a cruzar al eje x positivo, para lo cual comprobamos cuando cruza
+        al eje x en la parte negativa, añadiendo que ha pasado una iteración mientras esto no ocurra.
+        Luego reptimos el proceso una vez cruza la parte negativa hasta que vuelve a cruzar pero por 
+        la positiva */
+        for (k=1;k<9;k++)
+            {
+                if ((r[k][1]>0.0) && (semiT[k]==false))
+                {
+                T[k]=T[k]+1.0;
+                
+                }
+
+                else if (((r[k][1]<0.0) && (encontrado[k]==false)))
+                {
+                T[k]=T[k]+1.0;
+                semiT[k]=true;
+                }
+
+                else if ((r[k][1]>0.0) && (semiT[k]==true))
+                {
+                encontrado[k]=true;
+                }
+
+            }
+
+            if (encontrado[5]==true && encontrado[6]==true && encontrado[7]==true && encontrado[8]==true && encontrado[9]==true)
+            {
+                periodo=true;
+            }
+    }
+    
 
     t=t+h;
         
     } while (t<=Tmax);
-    
-    
+
+    for (d=0;d<9;d++)
+    {
+        fichero3 << T[d]*h*sqrt(C*C*C/(G*MS))/(3600*24)<<endl;
+    }
+    cout << T[3]*h*sqrt(C*C*C/(G*MS))/(3600*24);
     fichero1.close();
     fichero2.close();
+    fichero3.close();
     cin>>n;
 
 
@@ -116,8 +169,13 @@ void aceleracion (float m[9],float r[9][2],float a[9][2])
            /*calculo el módulo de la diferencia de posiciones
        denominador de la expresión*/
        modu=sqrt((r[i][0]-r[j][0])*(r[i][0]-r[j][0])+(r[i][1]-r[j][1])*(r[i][1]-r[j][1]));
-       sumax=sumax-m[j]*(r[i][0]-r[j][0])/(pow(modu,3));
-       sumay=sumay-m[j]*(r[i][1]-r[j][1])/(pow(modu,3));
+       sumax=sumax-m[j]*(r[i][0]-r[j][0])*(pow(modu,-3));
+       sumay=sumay-m[j]*(r[i][1]-r[j][1])*(pow(modu,-3));
+       }
+       else 
+       {
+           sumax=sumax;
+           sumay=sumay;
        }
        
 
@@ -169,12 +227,11 @@ void lecturadatos (float m[9],float r[9][2],float v[9][2])
 
 /* los cálculos que realizados se basan en expresiones
 cuyas magnitudes están reescaladas*/
- void reescalar (double& Tmax, double& h, float m[9], float r[9][2], float v [9][2])
+ void reescalar (float m[9], float r[9][2], float v [9][2])
  {
      int i, j, k;
 
-     Tmax=Tmax*sqrt(G*MS/(C*C*C));
-     h=h*sqrt(G*MS/(C*C*C));
+     
 
      for (j=0; j<9; j++)
      {
@@ -194,18 +251,49 @@ cuyas magnitudes están reescaladas*/
  }
 
 
- void copiar (float a[9][2], string nombre)
+ 
+
+ void calculoT (float T[9])
  {
-     int i;
-     ofstream fichero;
+      ifstream datos;
+    int k,l,n;
+    float p[9][2];
+    bool periodo, encontrado[9];
+    k=0;
+    l=0;
+    periodo=false;
+    
+    datos.open("datos.txt");
+    for (l=0;l<9;l++)
+    {
+        T[l]=0.0;
+        encontrado[l]=false;
+    }
+    
 
-     
-
-     
-
-     
-     
+    while (!datos.eof() && periodo==false)
+    {
+        for (k=1;k<9;k++)
+        {
+            datos >> p[k][0];
+            datos >> p[k][1];
+            if ((p[k][0]<0.0) && (encontrado[k]==false))
+            {
+                T[k]=T[k]+1.0;
+                encontrado[k]=true;
+            }
+        }
+        
+        
+    }
+    datos.close();
     return;
  }
+
+
+
+
+
+
 
 
