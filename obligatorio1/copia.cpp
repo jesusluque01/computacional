@@ -24,6 +24,7 @@ int main (void)
     ofstream fichero1, fichero2, fichero3;
     ifstream datos;
     double t, Tmax, h;
+    int n,i,j,k,l,d,f, contador;
     int n,i,j,k,l,d,f;
     float a[9][2], v[9][2], r[9][2], anuevo[9][2], w[9][2];
     float m[9], T[9];
@@ -42,6 +43,7 @@ int main (void)
 
 
     //establezco el tiempo límite y el paso
+    Tmax=1500;
     Tmax=10000;
     h=0.01;
     t=0.0;
@@ -62,7 +64,8 @@ int main (void)
         semiT[n]=false;
         encontrado[n]=false;
     }
-    
+    //inicializo el contador para mostrar datos
+    contador=0;
     //Algoritmo de verlet
     do
     {
@@ -88,6 +91,15 @@ int main (void)
     //calculamos la energía
     E=0;
     for (f=1; f<9; f++)
+    {   
+        modulo=sqrt((r[0][0]-r[f][0])*(r[0][0]-r[f][0])+(r[0][1]-r[f][1])*(r[0][1]-r[f][1]));
+        modV=sqrt((v[f][0])*v[f][0])+(v[f][1])*(v[f][1]);
+        E=E+(m[0]*m[f]/modulo+0.5*m[f]*modV*modV);
+    }
+    //pasamos los resultados a un fichero una vez caca X iteraciones
+    if (contador==50)
+    {
+        for (l=0;l<9;l++)
     {
         E=(m[0]*m[f]/modulo+0.5*m[f]*modV*modV);
     }
@@ -95,12 +107,16 @@ int main (void)
     for (l=0;l<9;l++)
      {
          fichero1 << r[l][0]<<", "<<r[l][1]<<endl;
-         fichero2 << v[l][0]<<", "<<v[l][1]<<endl;
+         
      }
     
+        
 
         fichero1<<endl;
-
+        contador=0;
+    }
+    //sacamos la energia
+    fichero2 << E <<" "<< t <<endl;
     //Calculamos el periodo
     //comprobamos que no se tenga ya el valor de los periodos
     if (periodo==false)
@@ -140,6 +156,7 @@ int main (void)
     
 
     t=t+h;
+    contador=contador+1;
         
     } while (t<=Tmax);
 
