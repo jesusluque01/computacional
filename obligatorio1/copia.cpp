@@ -10,7 +10,7 @@ using namespace std;
 void aceleracion (float m[9],float r[9][2],float a[9][2]);
 void lecturadatos (float m[9],float r[9][2],float v[9][2]);
 
-void copiar (float a[9][2], string nombre);
+
 
 #define G 6.67e-11
 #define MS 1.989e30
@@ -24,9 +24,10 @@ int main (void)
     ofstream fichero1, fichero2, fichero3;
     ifstream datos;
     double t, Tmax, h;
-    int n,i,j,k,l,d;
+    int n,i,j,k,l,d,f;
     float a[9][2], v[9][2], r[9][2], anuevo[9][2], w[9][2];
     float m[9], T[9];
+    float E, modulo, modV;
     string nombrefich1, nombrefich2, nombrefich3;
     bool periodo, encontrado[9], semiT[9];
 
@@ -41,7 +42,7 @@ int main (void)
 
 
     //establezco el tiempo límite y el paso
-    Tmax=1000;
+    Tmax=10000;
     h=0.01;
     t=0.0;
 
@@ -84,6 +85,12 @@ int main (void)
          v[j][1]=w[j][1]+h*0.5*a[j][1];
     }
 
+    //calculamos la energía
+    E=0;
+    for (f=1; f<9; f++)
+    {
+        E=(m[0]*m[f]/modulo+0.5*m[f]*modV*modV);
+    }
     //pasamos los resultados a un fichero
     for (l=0;l<9;l++)
      {
@@ -91,6 +98,7 @@ int main (void)
          fichero2 << v[l][0]<<", "<<v[l][1]<<endl;
      }
     
+
         fichero1<<endl;
 
     //Calculamos el periodo
@@ -253,42 +261,12 @@ cuyas magnitudes están reescaladas*/
 
  
 
- void calculoT (float T[9])
- {
-      ifstream datos;
-    int k,l,n;
-    float p[9][2];
-    bool periodo, encontrado[9];
-    k=0;
-    l=0;
-    periodo=false;
-    
-    datos.open("datos.txt");
-    for (l=0;l<9;l++)
-    {
-        T[l]=0.0;
-        encontrado[l]=false;
-    }
-    
+ 
 
-    while (!datos.eof() && periodo==false)
-    {
-        for (k=1;k<9;k++)
-        {
-            datos >> p[k][0];
-            datos >> p[k][1];
-            if ((p[k][0]<0.0) && (encontrado[k]==false))
-            {
-                T[k]=T[k]+1.0;
-                encontrado[k]=true;
-            }
-        }
-        
-        
-    }
-    datos.close();
-    return;
- }
+
+
+
+
 
 
 
