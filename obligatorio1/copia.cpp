@@ -10,26 +10,20 @@ using namespace std;
 void aceleracion (float m[9],float r[9][2],float a[9][2]);
 void lecturadatos (float m[9],float r[9][2],float v[9][2]);
 
-
-
 #define G 6.67e-11
 #define MS 1.989e30
 #define C 1.49e11
 
-
-
-
 int main (void)
 {
-    ofstream fichero1, fichero2, fichero3;
+    ofstream fichero1, fichero2, fichero3, fichero4;
     ifstream datos;
     double t, Tmax, h;
     int n,i,j,k,l,d,f, contador;
-    int n,i,j,k,l,d,f;
     float a[9][2], v[9][2], r[9][2], anuevo[9][2], w[9][2];
     float m[9], T[9];
     float E, modulo, modV;
-    string nombrefich1, nombrefich2, nombrefich3;
+    string nombrefich1, nombrefich2, nombrefich3, nombrefich4;
     bool periodo, encontrado[9], semiT[9];
 
 
@@ -37,14 +31,15 @@ int main (void)
     nombrefich1="datos.txt";
     nombrefich2="energia.txt";
     nombrefich3="periodos.txt";
+    nombrefich4="geocentrico.txt";
     fichero1.open(nombrefich1.c_str());
     fichero2.open(nombrefich2.c_str());
     fichero3.open(nombrefich3.c_str());
-
+    fichero4.open(nombrefich4.c_str());
 
     //establezco el tiempo límite y el paso
-    Tmax=1500;
-    Tmax=10000;
+
+    Tmax=1000;
     h=0.01;
     t=0.0;
 
@@ -53,8 +48,6 @@ int main (void)
     lecturadatos (m,r,v);
     reescalar (m,r,v);
     aceleracion (m,r,a);
-    cout<< r[3][1]<< v[1][1];
-
     
     //Inicializo las variables necesarias para calcular los periodos
     periodo=false;
@@ -99,20 +92,19 @@ int main (void)
     //pasamos los resultados a un fichero una vez caca X iteraciones
     if (contador==50)
     {
-        for (l=0;l<9;l++)
-    {
-        E=(m[0]*m[f]/modulo+0.5*m[f]*modV*modV);
-    }
+        
     //pasamos los resultados a un fichero
     for (l=0;l<9;l++)
      {
          fichero1 << r[l][0]<<", "<<r[l][1]<<endl;
+         fichero4 << r[l][0]-r[3][0]<<", "<<r[l][1]-r[3][1]<<endl;
          
      }
     
         
 
         fichero1<<endl;
+        fichero4<<endl;
         contador=0;
     }
     //sacamos la energia
@@ -154,12 +146,13 @@ int main (void)
             }
     }
     
-
+    //actualizamos t y el contador para la muestra de datos
     t=t+h;
     contador=contador+1;
         
     } while (t<=Tmax);
 
+    //sacamos los periodos
     for (d=0;d<9;d++)
     {
         fichero3 << T[d]*h*sqrt(C*C*C/(G*MS))/(3600*24)<<endl;
@@ -168,11 +161,9 @@ int main (void)
     fichero1.close();
     fichero2.close();
     fichero3.close();
+    fichero4.close();
+    
     cin>>n;
-
-
-
-
 
     return 0;
 }
