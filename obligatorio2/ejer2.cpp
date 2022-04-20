@@ -22,10 +22,11 @@ int main (void)
     fichero1.open(nombrefich1.c_str());
     //establecemos el rango de la matriz, la temperatura y si queremos una configuración
     //inicial ordenada o no
-    Z=64;
-    T=0.2;
-    ordenada=true;
-
+    Z=150;
+    T=4.8;
+    ordenada=false;
+     srand(time(NULL));
+ 
     if (ordenada==true)
     {
         //inicializo a una configuración ordenada
@@ -69,7 +70,7 @@ int main (void)
      }
 
         fichero1<<endl;
-         srand(time(NULL));
+        
 
 
 
@@ -100,7 +101,7 @@ int main (void)
             p=1.0;
         }
 
-        XI=(rand()%Z)/(Z*1.0);
+        XI=rand()/(RAND_MAX*1.0);
         if(XI<p)
         {
             S[n][m]=-S[n][m];
