@@ -24,7 +24,7 @@ int main (void)
     //inicial ordenada o no
     Z=150;
     T=4.8;
-    ordenada=false;
+    ordenada=true;
      srand(time(NULL));
  
     if (ordenada==true)
@@ -91,7 +91,7 @@ int main (void)
         
      else
      {
-        deltaE=2*S[n][m]*(S[(n+1)%Z][m]+S[(n-1)%Z][m]+S[n][(m+1)%Z]+S[n][(m-1)%Z]);
+        deltaE=2*S[n][m]*(S[(n+1)%Z][m]+S[(n-1+Z)%Z][m]+S[n][(m+1)%Z]+S[n][(m-1+Z)%Z]);
      }
          
 
