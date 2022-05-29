@@ -14,36 +14,59 @@ float CalcE (int S[][200], int Z);
 float CalcFi (int S[][200], int Z, int posicion);
 float CalcSigma (float vector[10000], float promedio);
 float CalcSigMatriz (float vector[128][10000], float promedio, int p);
+float CalcSigmaVec2 (float vector[10000], float promedio);
 
 
 int main (void)
 {
-    
+    int i,j,n,m,Z,l,o,q,k,PASOS, posicion, contador, otrocontador, temp;
     float T,p,deltaE, XI;
     float Mn[10000], MnTOT, Energia[10000], Emed,E2med, ETOT, Cn[10000], CnTOT,FiTOT[128];
-    float ErMn, ErEnergia, ErFi[128],FunCo[128][10000];
-    int i,j,n,m,Z,l,o,q,k,PASOS, posicion, contador, otrocontador; 
+    float ErMn, ErEnergia, ErFi[128], ErCn, ErEner2, Fi;
+    //float FunCo[40][10000];
+     
     int  S[200][200];
-    ofstream fichero1, fichero4;
-    string nombrefich1;
+    ofstream ficheroMag,ficheroEner, ficheroCalor, ficheroCorrel[10];
+    string nombrefich1, nombre2, nombre3, nombre4[10];
 
 
-    nombrefich1="ising_data.dat";
-    fichero1.open(nombrefich1.c_str());
+    nombrefich1="MagnetizacionN16.dat";
+    nombre2="EnergiaN16.dat";
+    nombre3="CalorEspecificoN16.dat";
+    for (k=0;k<10;k++)
+    {
+        nombre4[k]='a'+k;
+    }
+    
+    ficheroMag.open(nombrefich1.c_str());
+    ficheroEner.open(nombre2.c_str());
+    ficheroCalor.open(nombre3.c_str());
+    for (i=0;i<10;i++)
+    {
+        ficheroCorrel[i].open(nombre4[i].c_str());
+    }
+    
+
+
     //establecemos el rango de la matriz, la temperatura, el nº de
     //pasos montecarlo 
-    Z=6;
+    Z=16;
     T=1.5;
     PASOS=1E6;
     
-
-    //inicializo los valores promedio a calcular
+    //realizamos todo el proceso para temperaturas entre 1.5 y 3.5
+    //pasos de 2/9 en la temperatura
+    for (temp=0; temp<10; temp++)
+    {
+        //actualizamos la temperatura
+        T=T+0.22222222*temp;
+            //inicializo los valores promedio a calcular
 
     MnTOT=0.0;
     ETOT=0.0;
     CnTOT=0.0;
     Emed=0.0;
-    E2med=0.0;
+    E2med=0.0; //energia al cuadrado
     for (i=0;i<Z;i++)
     {
       FiTOT[i]=0.0;  
@@ -104,23 +127,21 @@ int main (void)
 
     if (contador==99)
     {
-        //calculamos los parámetros de interés
+        //calculamos los parámetros de interés una vez cada 100 pasos
      Mn[otrocontador]=CalcMn(S,Z);    
      Energia[otrocontador]=CalcE(S,Z);
      Cn[otrocontador]=Energia[otrocontador]*Energia[otrocontador];
      
      for(l=0;l<Z;l++)
      {
-         //AQUI ESTA EL ERROR
-         //TO MIS MUERTOS
-         // ARREGLALO DIOS POR FAVOR
+         
         
-            FunCo[l][otrocontador]=CalcFi(S,Z,l);
-            FiTOT[l]=FiTOT[l]+FunCo[l][otrocontador];
+            //FunCo[l][otrocontador]=CalcFi(S,Z,l);
+            Fi=CalcFi(S,Z,l);
+            FiTOT[l]=FiTOT[l]+Fi;
          
          
-         //AYUDA
-         //AYUDA
+         
      }
      
     //actualizo el valor de los promedios
@@ -148,25 +169,36 @@ int main (void)
         FiTOT[k]=FiTOT[k]/(Z*Z*(PASOS/100));
     }
     
+    //calculamos los errores
+    ErMn=sqrt(CalcSigma(Mn,MnTOT)/10000);
+    ErEnergia=sqrt(CalcSigma(Energia,ETOT)/10000)/(2*Z*Z);
+    ErEner2=sqrt(CalcSigmaVec2(Energia,E2med)/10000);
+    //ErCn=sqrt(ErEner2*ErEner2+4*ErEnergia*ErEnergia)/(Z*Z*T);
     
-    //cerramos los ficheros
-    fichero1.close();
-    cout<<MnTOT<<endl;
-    cout<<ETOT<<endl;
-    cout<<CnTOT<<endl;
+    ficheroMag<<T<<"   "<<MnTOT<<"   "<<ErMn<<endl;
+    ficheroEner<<T<<"   "<<ETOT<<"   "<<ErEnergia<<endl;
+    ficheroCalor<<T<<"   "<<CnTOT<<endl;
+    
     for (j=0;j<Z;j++)
     {
-        cout<<FiTOT[j]<<" ";
+        ficheroCorrel[temp]<<j<<"   "<<FiTOT[j]<<endl;
+        //ErFi[j]=sqrt(CalcSigMatriz(FunCo,FiTOT[j],j)/10000)/(Z*Z);
+        //ficheroCorrel[temp]<<ErFi[j]<<"   ";
+        //ficheroCorrel[temp]<<endl;
     }
-    cout<<endl;
-    ErMn=sqrt(CalcSigma(Mn,MnTOT)/10000);
-    cout<<ErMn<<endl;
-    ErEnergia=sqrt(CalcSigma(Energia,ETOT)/10000);
-    cout<<ErEnergia<<endl;
-    for(k=0;k<Z;k++)
+    
+
+    }
+
+
+    
+   
+    ficheroMag.close();
+    ficheroEner.close();
+    ficheroCalor.close();
+    for (j=0;j<10;j++)
     {
-        ErFi[k]=sqrt(CalcSigMatriz(FunCo,FiTOT[k],k)/10000);
-        cout<<ErFi[k]<<endl;
+        ficheroCorrel[j].close();
     }
     
     return 0;
@@ -218,7 +250,7 @@ float CalcE (int S[][200], int Z)
 
     return E;
 }
-//preguntar por que hay que calcular exactamente ¿dependencia con i F(i)???
+
 float CalcFi (int S[][200], int Z, int posicion)
 {
      int i, j;
@@ -250,6 +282,8 @@ float CalcSigma (float vector[10000], float promedio)
     return sigma/10000;
 }
 
+// para poder calcular las cosas sin que pete, como este error suda lo comento
+/*
 float CalcSigMatriz (float vector[128][10000], float promedio, int p)
 {
      int j;
@@ -259,6 +293,21 @@ float CalcSigMatriz (float vector[128][10000], float promedio, int p)
     for (j=0;j<10000;j++)
     {
        sigma=sigma+(vector[p][j]-promedio)*(vector[p][j]-promedio); 
+    }
+    
+    return sigma/10000;
+}
+*/
+
+float CalcSigmaVec2 (float vector[10000], float promedio)
+{
+    int j;
+    float sigma;
+
+    sigma=0.0;
+    for (j=0;j<10000;j++)
+    {
+       sigma=sigma+(vector[j]*vector[j]-promedio)*(vector[j]*vector[j]-promedio); 
     }
     
     return sigma/10000;
