@@ -23,16 +23,16 @@ int main (void)
     float T,p,deltaE, XI;
     float Mn[10000], MnTOT, Energia[10000], Emed,E2med, ETOT, Cn[10000], CnTOT,FiTOT[128];
     float ErMn, ErEnergia, ErFi[128], ErCn, ErEner2, Fi;
-    //float FunCo[40][10000];
+    //float FunCo[128][10000];
      
     int  S[200][200];
     ofstream ficheroMag,ficheroEner, ficheroCalor, ficheroCorrel[10];
     string nombrefich1, nombre2, nombre3, nombre4[10];
 
-
-    nombrefich1="MagnetizacionN16.dat";
-    nombre2="EnergiaN16.dat";
-    nombre3="CalorEspecificoN16.dat";
+   
+    nombrefich1="MagnetizacionN128.dat";
+    nombre2="EnergiaN128.dat";
+    nombre3="CalorEspecificoN128.dat";
     for (k=0;k<10;k++)
     {
         nombre4[k]='a'+k;
@@ -50,8 +50,8 @@ int main (void)
 
     //establecemos el rango de la matriz, la temperatura, el nº de
     //pasos montecarlo 
-    Z=16;
-    T=1.5;
+    Z=128;
+    T=1.5; 
     PASOS=1E6;
     
     //realizamos todo el proceso para temperaturas entre 1.5 y 3.5
@@ -59,7 +59,7 @@ int main (void)
     for (temp=0; temp<10; temp++)
     {
         //actualizamos la temperatura
-        T=T+0.22222222*temp;
+        T=1.5+0.222222*temp;
             //inicializo los valores promedio a calcular
 
     MnTOT=0.0;
@@ -164,20 +164,20 @@ int main (void)
     ETOT=Emed/(2*Z*Z);
     E2med=E2med/(PASOS/100);
     CnTOT=(E2med-Emed*Emed)/(Z*Z*T);
-    for (k=0;k<Z;k++)
+   for (k=0;k<Z;k++)
     {
         FiTOT[k]=FiTOT[k]/(Z*Z*(PASOS/100));
     }
     
-    //calculamos los errores
+    //calculamos las sigmas
     ErMn=sqrt(CalcSigma(Mn,MnTOT)/10000);
     ErEnergia=sqrt(CalcSigma(Energia,ETOT)/10000)/(2*Z*Z);
     ErEner2=sqrt(CalcSigmaVec2(Energia,E2med)/10000);
     //ErCn=sqrt(ErEner2*ErEner2+4*ErEnergia*ErEnergia)/(Z*Z*T);
     
-    ficheroMag<<T<<"   "<<MnTOT<<"   "<<ErMn<<endl;
-    ficheroEner<<T<<"   "<<ETOT<<"   "<<ErEnergia<<endl;
-    ficheroCalor<<T<<"   "<<CnTOT<<endl;
+    ficheroMag<<T<<"   "<<MnTOT<<"   "<<2*ErMn<<endl;
+    ficheroEner<<T<<"   "<<ETOT<<"   "<<2*ErEnergia<<endl;
+    ficheroCalor<<T<<"   "<<CnTOT<<"  "<<ETOT<<"   "<<E2med<<"   "<<ErEner2<<"  "<<ErEnergia*2*Z*Z<<endl;
     
     for (j=0;j<Z;j++)
     {
@@ -186,7 +186,7 @@ int main (void)
         //ficheroCorrel[temp]<<ErFi[j]<<"   ";
         //ficheroCorrel[temp]<<endl;
     }
-    
+      
 
     }
 
@@ -261,7 +261,7 @@ float CalcFi (int S[][200], int Z, int posicion)
     {
         for (j=0;j<Z;j++)
         {
-            Fi=Fi+S[i][j]*S[i+posicion][j];
+            Fi=Fi+S[i][j]*S[(i+posicion)%Z][j];
         }
     }
 
@@ -282,7 +282,7 @@ float CalcSigma (float vector[10000], float promedio)
     return sigma/10000;
 }
 
-// para poder calcular las cosas sin que pete, como este error suda lo comento
+
 /*
 float CalcSigMatriz (float vector[128][10000], float promedio, int p)
 {
